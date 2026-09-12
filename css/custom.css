@@ -1,0 +1,49 @@
+/*Custom Fonts*/
+@font-face {
+    font-family: 'Chinese';
+    src: url(font/SentyWEN2017.ttf) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Bell';
+    src: url(font/Caladea-Bold.ttf) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.chinese-font {
+    font-family: 'Chinese', Helvetica, Arial, sans-serif;
+}
+
+.bell-font {
+    font-family: 'Bell', Helvetica, Arial, sans-serif;
+}
+/*End Custom Fonts*/
+
+html, body {
+    background-color: black;
+}
+
+.home {
+    color: white;
+}
+.home:hover { 
+    color: turquoise;
+}
+
+.pinpad-btn, .pinpad {
+    font-size: 2rem; 
+}
+
+.continue-btn {
+    font-size: 2rem; 
+    color: cornflowerblue;
+}
+.continue-btn:hover {
+    font-size: 2rem; 
+    color: lightskyblue;
+}
+
+

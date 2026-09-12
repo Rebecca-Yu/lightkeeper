@@ -1,0 +1,12 @@
+/* Character cards uniform size */
+.character-card {
+  height: 240px;
+  align-items: stretch;
+}
+
+/* Image reduced, not cropped */
+.character-card img {
+  height: 150px;
+  width: 100%;
+  object-fit: contain;
+}

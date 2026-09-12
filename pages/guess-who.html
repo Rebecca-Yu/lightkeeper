@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>guess-who</title>
+        <link rel="icon" type="image/svg" href="../images/favicon/person-bounding-box.svg">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+        <link href="../css/custom.css" rel="stylesheet">
+        <link href="../css/guess-who.css" rel="stylesheet">
+    </head>
+    <body>
+        <!-- HOME NAV BAR -->
+        <div class="pt-3 pb-2 ps-3 bg-dark">
+            <h6><a href="../index.html"><i class="bi bi-house home"></i></a></h6>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row pt-5">
+                <!-- LEFT COLUMN -->
+                <div class="col-1 d-flex flex-column align-items-center p-4 gap-4">
+                    <button class="btn btn-outline-danger" id="restartBtn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Restart">
+                        <i class="bi bi-arrow-clockwise fs-3"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-warning" id="nextClueBtn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Next Clue">
+                        <i class="bi bi-lightbulb fs-3"></i>
+                    </button>
+
+                    <button class="btn btn-outline-success" id="nextCharacterBtn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Next Character">
+                        <i class="bi bi-arrow-right fs-3"></i>
+                    </button>
+                </div>
+
+                <!-- CENTER -->
+                <div class="col-9 col-md-10">
+                    <!-- CLUE CARD -->
+                    <div class="col-md-6 col-12 card border-info bg-transparent mb-4 mx-auto">
+                        <p class="card-header text-info text-center bell-font" id="clueHeader">CLUE</p>
+                        <h6 class="card-body text-center text-light bell-font" id="clueBox">Loading clues...</h6>
+                    </div>
+
+                    <!-- GUESS WHO CHARACTER GRID -->
+                    <div class="row g-3" id="cardGrid"></div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="col-1 d-flex flex-column align-items-center pt-4 gap-4">
+                    <div class="text-center text-light bell-font">
+                        <h5>Round</h5>
+                        <h2 id="round">0</h2>
+                    </div>
+
+                    <div class="text-center text-light bell-font">
+                        <h5>Score</h5>
+                        <h2 id="score">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="../js/custom.js"></script>
+        <script src="../js/guess-who.js"></script>
+    </body>
+</html>
