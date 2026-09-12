@@ -149,7 +149,7 @@ function renderMultipleChoice(q) {
         if (q.answerDatatype.toLowerCase() === "image") {
             const img = document.createElement("img");
             img.src = `../images/challengeQA/${value}.png`; 
-            img.alt = option;
+            img.alt = "option " + letter;
             img.className = "img-fluid choice-img";
             btn.appendChild(img);
         } else {
