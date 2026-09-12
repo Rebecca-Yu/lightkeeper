@@ -108,10 +108,16 @@ function renderTextAnswer(q) {
 
         // Restore previous answer
         if (q.lastAnswer) {
-            const chars = q.lastAnswer.split("");
-            if (chars[i]) input.value = chars[i];
+            let parts = q.lastAnswer.split(",");
+            if (q.answerDatatype.toLowerCase() === "number") {
+                parts = q.lastAnswer.split("");
+            }
+            if (parts[i]) input.value = parts[i];
         }
 
+        if (q.status === "correct") {
+            input.disabled = true
+        }
         group.appendChild(input);
     }
 
@@ -343,16 +349,22 @@ function validateAnswer() {
         const inputGroup = answerAreaEl.querySelector('[data-answer-inputs="true"]');
         const inputs = inputGroup ? Array.from(inputGroup.querySelectorAll("input")) : [];
 
-        const rawValues = inputs.map(i => i.value.trim()).filter(v => v !== "");
+        const rawValues = inputs.map(i => i.value.trim());
 
-        if (!rawValues.length) {
-            feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Enter an answer.`;
+        const allFilled = rawValues.every(v => v !== "");
+        if (!allFilled) {
+            feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Enter all answers.`;
             feedbackEl.className = "mt-3 text-center bell-font fs-3 text-warning";
             return;
         }
 
-        userAnswer = rawValues.join("");
-        q.lastAnswer = userAnswer;
+        if (q.answerDatatype.toLowerCase() === "number") {
+            q.lastAnswer = rawValues.join("");
+        }
+        else {
+            q.lastAnswer = rawValues.join(",");
+        }
+        userAnswer = q.lastAnswer;
     }
 
     const isCorrect = compareAnswer(userAnswer, correctRaw, q);
