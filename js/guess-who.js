@@ -47,11 +47,14 @@ function renderCards() {
   cardGrid.innerHTML = "";
 
   characters.forEach(s => {
-    const characterCell = document.createElement("div");
-    characterCell.className = "col-lg-2 col-md-3 col-sm-4 col-6"; // 6 cards per row
+    const characterCell = document.createElement("button");
+    characterCell.className = "btn btn-light character-card m-1"; // 6 cards per row
+
+    const characterClass = s.character.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '');
+    characterCell.classList.add(characterClass);
 
     characterCell.innerHTML = `
-      <div class="card character-card" onclick="handleGuess('${s.character}')">
+      <div class="" onclick="handleGuess('${s.character}')">
         <img src="../images/saints/${s.character}.png"
              class="card-img-top pt-2"
              onerror="this.src='../images/saints/person-fill-exclamation.svg'">
@@ -77,8 +80,7 @@ function nextCharacter() {
   index++;
 
   if (index >= order.length) {
-    order = shuffle([...Array(characters.length).keys()]);
-    index = 0;
+    return; 
   }
 
   currentCharacter = characters[order[index]];
@@ -91,6 +93,14 @@ function nextCharacter() {
   clueBox.textContent = `${currentCharacter.clues[0]}`;
   nextClueBtn.disabled = false;
   nextCharacterBtn.disabled = true;
+
+  const characterbtns = cardGrid.querySelectorAll("button");
+
+  characterbtns.forEach(btn => {
+    btn.classList.remove("btn-danger");
+    btn.classList.remove("btn-success");
+    btn.classList.add("btn-light");
+  });
 }
 
 function nextClue() {
@@ -111,20 +121,30 @@ function handleGuess(guessName) {
   const correct = currentCharacter.character.toLowerCase();
   const guess = guessName.toLowerCase();
 
+  const characterClass = guess.replace(/\s+/g, '-').replace(/\./g, '');
+  const guessBtn = document.querySelector(`.${characterClass}`);
+
   if (guess === correct) {
     const pts = points(clueNumber);
     score += pts;
     scoreEl.textContent = score;
 
     clueHeader.textContent = ``;
-    clueBox.textContent = `Correct! +${pts} points.`;
     finished = true;
 
     nextClueBtn.disabled = true;
     nextCharacterBtn.disabled = false;
-    setTimeout(() => {
-      clueBox.textContent = `Select "Next Character".`;
-    }, 1500);
+    if (index >= order.length - 1) {
+      clueBox.innerHTML = `<p>Correct! +${pts} points.</p><p>No more characters!</p>`;
+      nextCharacterBtn.disabled = true;
+    }
+    else {
+      clueBox.innerHTML = `<p>Correct! +${pts} points.</p><p>Select "Next Round" <i class="bi bi-arrow-right"></i></p>`;
+    }
+
+    guessBtn.classList.remove("btn-light");
+    guessBtn.classList.remove("btn-danger");
+    guessBtn.classList.add("btn-success");
   } 
   else {
     score -= 100;
@@ -135,6 +155,10 @@ function handleGuess(guessName) {
       clueHeader.textContent = `CLUE #${clueNumber}`;
       clueBox.textContent = `${currentCharacter.clues[clueNumber - 1]}`;
     }, 1500);
+
+    guessBtn.classList.remove("btn-light");
+    guessBtn.classList.remove("btn-success");
+    guessBtn.classList.add("btn-danger");
   }
 }
 

@@ -1,8 +1,25 @@
-/* Character cards uniform size */
-.character-card {
-  height: 240px;
-  align-items: stretch;
+
+@media (min-width: 992px) {
+  .character-card {
+    width: 16%;
+    align-items: stretch;
+  }
 }
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .character-card {
+    width: 23%;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 767px) {
+  .character-card {
+    width: 43%;
+    align-items: stretch;
+  }
+}
+
 
 /* Image reduced, not cropped */
 .character-card img {
