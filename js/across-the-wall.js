@@ -327,7 +327,7 @@ function compareAnswer(user, correct, q) {
         const correctParts = correct.split(",").map(v => v.trim());
 
         // ORDER MATTERS
-        if (q.orderMatters.toUpperCase() === "YES") {
+        if (q.orderCheck.toUpperCase() === "Y") {
             return userParts.join(",").toLowerCase() === correctParts.join(",").toLowerCase();
         }
 

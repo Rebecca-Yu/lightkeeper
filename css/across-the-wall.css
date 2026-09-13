@@ -1,13 +1,20 @@
-.fs-0 {
-    font-size: 2rem;
-}
-
-@media (min-width: 768px) { 
+@media (min-width: 992px) {
     .fs-0 {
         font-size: 5rem;
     }
 }
 
+@media (min-width: 768px) and (max-width: 991px) {
+    .fs-0 {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .fs-0 {
+        font-size: 2rem;
+    }
+}
 
 .answer-group {
     gap: 1rem;
@@ -42,7 +49,6 @@
         width: 92%;
     }
 }
-
 
 .number-input {
     font-size: 3rem;
