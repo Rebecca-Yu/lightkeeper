@@ -72,7 +72,7 @@ function restartGame() {
 // ===============================
 function renderTextAnswer(q) {
     const group = document.createElement("div");
-    group.className = "d-flex flex-wrap gap-2 justify-content-center align-items-center";
+    group.className = "answer-group d-flex flex-wrap justify-content-center align-items-center";
 
     // prefix
     if (q.answerPrefix) {
@@ -83,6 +83,10 @@ function renderTextAnswer(q) {
     }
 
     const length = Number(q.answerLength || 1);
+    if (length > 4) {
+        group.classList.add("multi-row");
+    }
+
     for (let i = 0; i < length; i++) {
         const input = document.createElement("input");
         input.type = "text";
@@ -206,7 +210,7 @@ function renderQuestion() {
     else {        
         if (q.q2Datatype.toLowerCase() === "sequence" && q.q2) {
             q2El.textContent = q.q2 || "";
-            q2El.className = "mb-5 text-center bell-font fs-0";
+            q2El.className = "mb-5 text-center bell-font fs-0 sequence-text";
         }
         else if (q.q2Datatype.toLowerCase() === "list" && q.q2) {
             const items = q.q2.split(",").map(s => s.trim()).filter(Boolean);
@@ -316,6 +320,24 @@ function compareAnswer(user, correct, q) {
         return user.toUpperCase() === correct.toUpperCase();
     }
 
+    // multipart short-answer or coordinates
+    if (dt === "coordinates" || dt === "short-answer") {
+
+        const userParts = user.split(",").map(v => v.trim());
+        const correctParts = correct.split(",").map(v => v.trim());
+
+        // ORDER MATTERS
+        if (q.orderMatters.toUpperCase() === "YES") {
+            return userParts.join(",").toLowerCase() === correctParts.join(",").toLowerCase();
+        }
+
+        // ORDER DOES NOT MATTER
+        userParts.sort();
+        correctParts.sort();
+
+        return userParts.join(",").toLowerCase() === correctParts.join(",").toLowerCase();
+    }
+
     // alphanumeric / text
     return user.toLowerCase() === correct.toLowerCase();
 }
@@ -411,6 +433,7 @@ fetch("../assets/AcrossTheWall.xlsx")
             answerPrefix: header.indexOf("answer-prefix"),
             answerSuffix: header.indexOf("answer-suffix"),
             answerLength: header.indexOf("answer-length"),
+            orderCheck: header.indexOf("order-check"),
             correct: header.indexOf("correct-answer"),
             A: header.indexOf("A"),
             B: header.indexOf("B"),
@@ -434,6 +457,7 @@ fetch("../assets/AcrossTheWall.xlsx")
                     answerPrefix: r[idx.answerPrefix] || "",
                     answerSuffix: r[idx.answerSuffix] || "",
                     answerLength: r[idx.answerLength] || "",
+                    orderCheck: r[idx.orderCheck] || "Y",
                     correct: r[idx.correct] || "",
                     status: "unanswered",
                     options: {
