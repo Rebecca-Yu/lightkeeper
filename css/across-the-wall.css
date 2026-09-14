@@ -1,18 +1,18 @@
 @media (min-width: 992px) {
     .fs-0 {
-        font-size: 5rem;
+        font-size: 3rem;
     }
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
     .fs-0 {
-        font-size: 3rem;
+        font-size: 2rem;
     }
 }
 
 @media (max-width: 767px) {
     .fs-0 {
-        font-size: 2rem;
+        font-size: 1.6rem;
     }
 }
 
@@ -67,7 +67,8 @@
 }
 
 .sequence-text {
-    white-space: pre;
+    white-space: pre-wrap;   /* allow wrapping */
+    word-break: break-word;  /* break long chunks */
 }
 
 .question-img {
