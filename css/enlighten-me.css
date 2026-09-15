@@ -1,0 +1,25 @@
+.square-btn {
+    min-width: 40px;
+    max-width: 60px;
+    padding: 0 !important;
+}
+
+
+
+@media (min-width: 768px) {
+    .box {
+        border-width: 5px;
+        border-color: #212529;
+        font-size: 2rem;
+        max-width: 4rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .box {
+        border-width: 2px;
+        border-color: #212529;
+        font-size: 1rem;
+        max-width: 1.8rem;
+    }
+}
