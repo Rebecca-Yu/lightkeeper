@@ -13,6 +13,12 @@
         font-size: 2rem;
         max-width: 4rem;
     }
+    .space {
+        border-width: 5px;
+        border-color: white;
+        font-size: 2rem;
+        max-width: 4rem;
+    }
 }
 
 @media (max-width: 767px) {

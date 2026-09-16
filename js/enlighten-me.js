@@ -50,6 +50,10 @@ function renderWordBoxes() {
         box.className = "form-control box bell-font text-center p-0";
         box.readOnly = true;
         box.value = letter;
+        if (letter === " ") {
+            box.classList.remove("box");
+            box.classList.add("space");
+        }
         wordBox.appendChild(box);
     });
 }
@@ -94,19 +98,21 @@ function startGame() {
     revealed = Array(answer.length).fill("");
     incorrectGuesses = 0;
 
+    // Reveal spaces in the answer
+    for (let i = 0; i < answer.length; i++) {
+        const letter = answer[i];
+        if (letter === " ") {
+            revealed[i] = " ";
+        }
+    }
+
     scoreEl.textContent = score;
     questionIndexEl.textContent = `${currentIndex + 1}`;
     message.textContent = "";
     nextBtn.disabled = true;
 
     clueBox.innerHTML = `<p class="fs-5">${gameData.clue1}</p>`;
-    if (gameData.clue2Datatype === "image") {
-        clueBox.innerHTML += `<img src="../images/recipes/${gameData.clue2}.png" alt="Clue Image" class="img-fluid mt-2">`;
-    }
-    else if (gameData.clue2Datatype === "video") {
-        clueBox.innerHTML += `<video controls class="img-fluid mt-2"><source src="../videos/recipes/${gameData.clue2}.mp4" type="video/mp4">Your browser does not support the video tag.</video>`;
-    }
-    else {
+    if (gameData.clue2Datatype === "text") {
         clueBox.innerHTML += `<p class="fs-2 fs-sm-4">${gameData.clue2}</p>`;
     }
     
@@ -226,6 +232,7 @@ fetch("../assets/EnlightenMe.xlsx")
 restartBtn.onclick = () => {
     score = 0;
     currentIndex = 0;
+    questions = shuffle(questions);
     startGame();
 };
 
