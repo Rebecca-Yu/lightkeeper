@@ -4,8 +4,6 @@
     padding: 0 !important;
 }
 
-
-
 @media (min-width: 768px) {
     .box {
         border-width: 5px;
@@ -25,6 +23,12 @@
     .box {
         border-width: 2px;
         border-color: #212529;
+        font-size: 1rem;
+        max-width: 1.8rem;
+    }
+    .space {
+        border-width: 2px;
+        border-color: white;
         font-size: 1rem;
         max-width: 1.8rem;
     }
