@@ -171,7 +171,7 @@ function createOptionCard(type, value) {
     const img = document.createElement("img");
     const text = document.createElement("div");
     text.textContent = value;
-    img.src = `../images/recipes/${type}s/${value}.png`;
+    img.src = `../images/recipes/${type}s/${value.toLowerCase()}.png`;
     img.className = "card-img-top pt-2";
     cardClass = getClassName(value);
     card.className = `btn btn-outline-dark m-1 option-card ${cardClass}`;
