@@ -337,7 +337,6 @@ function addValueToSpecificPlaceholder(box, type, value) {
     // Level 1 or method → only one card allowed
     if (type === "method" || currentLevel === 1) {
         const previousValue = vals[0]; // old value
-        feedbackEl.textContent = previousValue + "|" + value;
         // Unselect previous option card BEFORE replacing
         if (previousValue && previousValue !== value) {
             unselectOption(type, previousValue);
