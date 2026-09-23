@@ -89,7 +89,7 @@ function setPlaceholderText(box){
     }
     else {
         box.textContent = "click/ drop item here";
-    }    
+    }
 }
 
 // ===============================
@@ -124,7 +124,7 @@ function renderQuestion(level) {
         row.className = "d-flex flex-wrap";
         q.correctIngredients.forEach((_, i) => {
             const box = document.createElement("div");
-            box.className = "placeholder-box single-placeholder m-1";
+            box.className = "placeholder-box single-placeholder m-1 responsive-text";
             box.dataset.slotType = "ingredient";
             box.dataset.slotIndex = String(i);
             setPlaceholderText(box)
@@ -136,7 +136,7 @@ function renderQuestion(level) {
     else {
         const row = document.createElement("div");
         const box = document.createElement("div");
-        box.className = "placeholder-box m-1";
+        box.className = "placeholder-box m-1 responsive-text";
         box.dataset.slotType = "ingredient";
         box.dataset.slotIndex = "0";
         setPlaceholderText(box)
@@ -171,6 +171,7 @@ function createOptionCard(type, value) {
     const img = document.createElement("img");
     const text = document.createElement("div");
     text.textContent = value;
+    text.className = "responsive-text";
     img.src = `../images/recipes/${type}s/${value.toLowerCase()}.png`;
     img.className = "card-img-top pt-2";
     cardClass = getClassName(value);
