@@ -7,7 +7,7 @@ let levelQuestions = {
     2: [],
     3: []
 };
-let currentLevel = null;
+let currentLevel = 1;
 let currentIndexByLevel = { 1: 0, 2: 0, 3: 0 };
 let answeredByLevel = { 1: new Set(), 2: new Set(), 3: new Set() };
 let totalScore = 0;
@@ -21,9 +21,6 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
 // DOM ELEMENTS
 // ===============================
 const scoreDisplay = document.getElementById("scoreDisplay");
-const level1Btn = document.getElementById("level1Btn");
-const level2Btn = document.getElementById("level2Btn");
-const level3Btn = document.getElementById("level3Btn");
 const nextQuestionBtn = document.getElementById("nextQuestionBtn");
 const dishNameEl = document.getElementById("dishName");
 const ingredientPlaceholdersEl = document.getElementById("ingredientPlaceholders");
@@ -35,6 +32,15 @@ const methodOptionsEl = document.getElementById("methodOptions");
 const checkBtn = document.getElementById("checkBtn");
 const feedbackEl = document.getElementById("feedback");
 const restartBtn = document.getElementById("restartBtn");
+
+const modalTextEl = document.getElementById("modalText");
+const levelSelectionEl = document.getElementById("levelSelection");
+const levelBtns = {
+    1: document.getElementById("level1Btn"),
+    2: document.getElementById("level2Btn"),
+    3: document.getElementById("level3Btn")
+};
+const tryAgainBtn = document.getElementById("tryAgainBtn");
 
 // ===============================
 // UTILITIES
@@ -60,8 +66,10 @@ function clearQuestionUI() {
     ingredientPlaceholdersEl.innerHTML = "";
     ingredientSectionEl.classList.add("d-none");
     ingredientOptionsEl.innerHTML = "";
-    methodOptionsEl.innerHTML = "";
+    methodPlaceholdersEl.innerHTML = "click/ drop method here";
+    methodPlaceholdersEl.classList.remove("filled");
     methodSectionEl.classList.add("d-none");
+    methodOptionsEl.innerHTML = "";
     feedbackEl.textContent = "";
     checkBtn.disabled = true;
 }
@@ -69,7 +77,7 @@ function clearQuestionUI() {
 function applyLevel(btn) {
     btn.classList.remove("btn-outline-dark");
     btn.classList.add("btn-dark");
-    for (const b of [level1Btn, level2Btn, level3Btn]) {
+    for (const b of Object.values(levelBtns)) {
         if (b !== btn) {
             b.classList.remove("btn-dark");
             b.classList.add("btn-outline-dark");
@@ -98,24 +106,16 @@ function setPlaceholderText(box){
 function renderQuestion(level) {
     clearQuestionUI();
 
-    const questions = levelQuestions[level];
-    const answeredSet = answeredByLevel[level];
+    const idx = getFirstUnansweredIndex(level);
 
-    let idx = currentIndexByLevel[level];
-    while (idx < questions.length && answeredSet.has(idx)) {
-        idx++;
-    }
-
-    if (idx >= questions.length) {
-        dishNameEl.textContent = "No more questions in this level.";
-        nextQuestionBtn.disabled = true;
-        checkBtn.disabled = true;
+    if (idx === null) {
+        handleLevelCompletion(level);
         return;
     }
 
     currentIndexByLevel[level] = idx;
-    const q = questions[idx];
 
+    const q = levelQuestions[level][idx];
     dishNameEl.textContent = q.dishName;
 
     // Ingredient placeholders + setup drag click behaviour
@@ -156,7 +156,7 @@ function renderQuestion(level) {
     }
 
     // Ingredient options
-    q.ingredients.forEach((ing, i) => {
+    shuffle([...q.ingredients]).forEach((ing, i) => {
         const card = createOptionCard("ingredient", ing.toLowerCase());
         ingredientOptionsEl.appendChild(card);
     });
@@ -418,6 +418,59 @@ function getUserSelection(level) {
     return { selectedIngredients, selectedMethod };
 }
 
+function getFirstUnansweredIndex(level) {
+    const questions = levelQuestions[level];
+    for (let i = 0; i < questions.length; i++) {
+        if (!answeredByLevel[level].has(i)) {
+            return i;
+        }
+    }
+    return null;
+}
+
+function questionLeftInLevel(level) {
+    return levelQuestions[level].some((_, i) => !answeredByLevel[level].has(i));
+}
+
+function findNextAvailableLevel() {
+    const totalLevels = Object.keys(levelQuestions).length;
+    // Try each subsequent level, wrapping around
+    for (let i = 1; i <= totalLevels; i++) {
+        const lvl = ((currentLevel - 1 + i) % totalLevels) + 1;
+        if (questionLeftInLevel(lvl)) {
+            return lvl; // Found a level with questions left
+        }
+    }
+    return null; // No levels left with questions
+}
+
+function handleLevelCompletion(level) {
+    // If this level still has questions, nothing to do
+    if (questionLeftInLevel(level)) return;
+
+    // Disable this level button
+    levelBtns[level].disabled = true;
+
+    // Find next level with questions
+    const nextLevel = findNextAvailableLevel();
+
+    if (nextLevel === null) {
+        // No levels left
+        feedbackEl.textContent = "No More Questions";
+        dishNameEl.textContent = "No more questions left!";
+        checkBtn.disabled = true;
+        nextQuestionBtn.disabled = true;
+        return;
+    }
+    else {
+        // Switch to next available level
+        currentLevel = nextLevel;
+        currentIndexByLevel[nextLevel] = getFirstUnansweredIndex(nextLevel);
+        applyLevel(levelBtns[currentLevel]);
+    }
+}
+
+
 function checkAnswer() {
     if (!currentLevel) return;
 
@@ -425,6 +478,14 @@ function checkAnswer() {
     const questions = levelQuestions[currentLevel];
     const idx = currentIndexByLevel[currentLevel];
     const q = questions[idx];
+
+    // if modal was closed accidentally
+    if (answeredByLevel[currentLevel].has(idx)) {
+        tryAgainBtn.hidden = true;
+        modalTextEl.hidden = false;
+        levelSelectionEl.classList.remove("d-none");
+        return;
+    }
 
     // retrieve user answer
     const { selectedIngredients, selectedMethod } = getUserSelection(currentLevel);
@@ -451,26 +512,26 @@ function checkAnswer() {
         feedbackEl.textContent = "Correct! +" + q.score;
         feedbackEl.style.color = "green";
         updateScore(q.score);
-        // Mark question as answered + disable submit
+        // Mark question as answered
         answeredByLevel[currentLevel].add(idx);
-        checkBtn.disabled = true;
+        //set model content
+        tryAgainBtn.hidden = true;
+        modalTextEl.hidden = false;
+        levelSelectionEl.classList.remove("d-none");
+
+        // check if at least one question in this level is not answered
+        handleLevelCompletion(currentLevel);
     } 
     else {
         feedbackEl.textContent = "Incorrect. -100";
         feedbackEl.style.color = "red";
         updateScore(-100);
-    }
-
-    // check if at least one question in this level is not answered
-    const questionsLeft = levelQuestions[currentLevel].some(
-        (_, i) => !answeredByLevel[currentLevel].has(i)
-    );
-    // If no more questions, disable next
-    if (!questionsLeft) {
-        nextQuestionBtn.disabled = true;
+        //set model content
+        tryAgainBtn.hidden = false;
+        modalTextEl.hidden = true;
+        levelSelectionEl.classList.add("d-none");
     }
 }
-
 
 
 // ===============================
@@ -533,6 +594,8 @@ fetch("../assets/SecretRecipe.xlsx")
         levelQuestions[1] = shuffle(allQuestions.filter(q => q.score === 100));
         levelQuestions[2] = shuffle(allQuestions.filter(q => q.score === 300));
         levelQuestions[3] = shuffle(allQuestions.filter(q => q.score === 500));
+
+        restartBtn.click(); // Start with first question of level 1
     })
     .catch(err => {
         console.error("XLSX LOAD ERROR:", err);
@@ -544,25 +607,22 @@ fetch("../assets/SecretRecipe.xlsx")
 // EVENTS
 // ===============================
 
-level1Btn.onclick = () => {
+levelBtns[1].onclick = () => {
     if (currentLevel === 1) return; // Already in level 1
     currentLevel = 1;
-    applyLevel(level1Btn);
-    renderQuestion(1);
+    applyLevel(levelBtns[1]);
 };
 
-level2Btn.onclick = () => {
+levelBtns[2].onclick = () => {
     if (currentLevel === 2) return; // Already in level 2 
     currentLevel = 2;
-    applyLevel(level2Btn);
-    renderQuestion(2);
+    applyLevel(levelBtns[2]);
 };
 
-level3Btn.onclick = () => {
+levelBtns[3].onclick = () => {
     if (currentLevel === 3) return; // Already in level 3
     currentLevel = 3;
-    applyLevel(level3Btn);
-    renderQuestion(3);
+    applyLevel(levelBtns[3]);
 };
 
 nextQuestionBtn.onclick = () => {
@@ -577,15 +637,16 @@ checkBtn.onclick = () => {
 
 restartBtn.onclick = () => {
     // Reset game state
-    currentLevel = null;
+    currentLevel = 1;
     currentIndexByLevel = { 1: 0, 2: 0, 3: 0 };
     answeredByLevel = { 1: new Set(), 2: new Set(), 3: new Set() };
     totalScore = 0;
     scoreDisplay.textContent = totalScore;
     clearQuestionUI();
-    dishNameEl.textContent = "Choose a level to begin.";
-    for (const b of [level1Btn, level2Btn, level3Btn]) {
-        b.classList.remove("btn-dark");
-        b.classList.add("btn-outline-dark");
+    dishNameEl.textContent = "";
+    for (const btn of Object.values(levelBtns)) {
+        btn.disabled = false;
     }
+    applyLevel(levelBtns[1]);
+    renderQuestion(currentLevel);
 }
