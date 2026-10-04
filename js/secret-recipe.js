@@ -11,6 +11,7 @@ let currentLevel = 1;
 let currentIndexByLevel = { 1: 0, 2: 0, 3: 0 };
 let answeredByLevel = { 1: new Set(), 2: new Set(), 3: new Set() };
 let totalScore = 0;
+let errorCount = 0;
 
 const methods = ["steam", "mix", "fry", "boil", "stir-fry", "assemble", "blend", "bake"];
 
@@ -507,10 +508,13 @@ function checkAnswer() {
             selectedMethod.toLowerCase() === q.correctMethod.toLowerCase();
     }
 
-    // set feedback
     if (ingredientsCorrect && methodCorrect) {
+        //reset error count for next question
+        errorCount = 0;
+        // set feedback
         feedbackEl.textContent = "Correct! +" + q.score;
-        feedbackEl.style.color = "green";
+        feedbackEl.classList.remove("text-danger");
+        feedbackEl.classList.add("text-success");
         updateScore(q.score);
         // Mark question as answered
         answeredByLevel[currentLevel].add(idx);
@@ -518,13 +522,58 @@ function checkAnswer() {
         tryAgainBtn.hidden = true;
         modalTextEl.hidden = false;
         levelSelectionEl.classList.remove("d-none");
-
         // check if at least one question in this level is not answered
         handleLevelCompletion(currentLevel);
     } 
     else {
-        feedbackEl.textContent = "Incorrect. -100";
-        feedbackEl.style.color = "red";
+        //increment error count
+        errorCount++;
+        // set feedback
+        if (errorCount >= 3 && currentLevel !== 1) {
+            let hint = "";
+            const numberCorrect = correctSet.size === userSet.size;
+            
+            if (!numberCorrect) {
+                hint = `Hint: There should be ${q.correctIngredients.length} ingredients`;
+            }
+            else {
+                if (!ingredientsCorrect) {
+                    hint = `Hint: The ingredients are incorrect`;
+                }
+                else {
+                    hint = `Hint: The ingredients are correct`;
+                }
+            }
+            if (!methodCorrect) {
+                if (hint.includes("incorrect") || hint.includes("should be")) {
+                    hint = hint + ` and the method is incorrect`; 
+                }
+                else if (hint) {
+                    hint = hint + ` but the method is incorrect`; 
+                }
+                else {
+                    hint = `Hint: The method is incorrect`;
+                }
+            }  
+            else if (currentLevel === 3 && methodCorrect) {
+                if (hint.includes("incorrect") || hint.includes("should be")) {
+                    hint = hint + ` but the method is correct`;  
+                }
+                else if (hint) {
+                    hint = hint + ` and the method is correct`;
+                }
+                else {
+                    hint = `Hint: The method is correct`;
+                }
+            }  
+            feedbackEl.innerHTML = `Incorrect. -100 <p class="text-warning">${hint}</p>`;
+        } 
+        else {
+            feedbackEl.textContent = "Incorrect. -100";
+        }
+
+        feedbackEl.classList.remove("text-success");
+        feedbackEl.classList.add("text-danger");
         updateScore(-100);
         //set model content
         tryAgainBtn.hidden = false;
@@ -640,6 +689,7 @@ restartBtn.onclick = () => {
     currentLevel = 1;
     currentIndexByLevel = { 1: 0, 2: 0, 3: 0 };
     answeredByLevel = { 1: new Set(), 2: new Set(), 3: new Set() };
+    errorCount = 0;
     totalScore = 0;
     scoreDisplay.textContent = totalScore;
     clearQuestionUI();
