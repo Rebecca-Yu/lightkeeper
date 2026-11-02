@@ -43,6 +43,7 @@ const gameScreen = document.getElementById("gameScreen");
 const startBtn = document.getElementById("startBtn");
 const gameTimerEl = document.getElementById("gameTimer");
 const closeModal = document.getElementById("closeModal");
+// const timeModalHeader = document.getElementById("timeModalHeader");
 
 const modalTextEl = document.getElementById("modalText");
 const levelSelectionEl = document.getElementById("levelSelection");
@@ -214,7 +215,7 @@ function createOptionCard(type, value) {
     text.className = "responsive-text";
     img.src = `../images/recipes/${type}s/${value.toLowerCase()}.png`;
     img.className = "card-img-top pt-2";
-    cardClass = getClassName(value);
+    const cardClass = getClassName(value);
     card.className = `btn btn-outline-dark m-1 option-card ${cardClass}`;
     card.draggable = true;
     card.dataset.optionType = type;
@@ -497,7 +498,8 @@ function handleLevelCompletion(level) {
     if (nextLevel === null) {
         // No levels left
         feedbackEl.textContent = "No More Questions";
-        dishNameEl.textContent = "No more questions left!";
+        // timeModalHeader.textContent = "No More Questions";
+        clearInterval(gameTimerInterval);
         checkBtn.disabled = true;
         nextQuestionBtn.disabled = true;
         return;
@@ -707,7 +709,8 @@ function startGameTimer() {
     gameTimerInterval = setInterval(() => {
         gameSeconds--;
         updateGameTimerDisplay();
-        if (gameSeconds <= 0) {
+        if (gameSeconds <= 0) { 
+            // timeModalHeader.textContent = "Time's Up!";
             clearInterval(gameTimerInterval);
             endGame();
         }
@@ -718,7 +721,7 @@ function endGame() {
     checkBtn.disabled = true;
     document.getElementById("finalScore").textContent = totalScore;
 
-    const modal = new bootstrap.Modal(document.getElementById("timeUpModal"));
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("timeUpModal"));
     modal.show();
 }
 
@@ -751,10 +754,7 @@ nextQuestionBtn.onclick = () => {
     renderQuestion(currentLevel);
 };
 
-checkBtn.onclick = () => {
-    checkAnswer();
-};
-
+checkBtn.addEventListener("click", checkAnswer);
 restartBtn.addEventListener("click", restartGame);
 closeModal.addEventListener("click", restartGame);
 
