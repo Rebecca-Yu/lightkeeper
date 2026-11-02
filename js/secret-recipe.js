@@ -1,6 +1,8 @@
 // ===============================
 // GAME STATE
 // ===============================
+const gameduration = 20; //min
+
 let allQuestions = [];
 let levelQuestions = {
     1: [],
@@ -12,6 +14,8 @@ let currentIndexByLevel = { 1: 0, 2: 0, 3: 0 };
 let answeredByLevel = { 1: new Set(), 2: new Set(), 3: new Set() };
 let totalScore = 0;
 let errorCount = 0;
+let gameTimerInterval;
+let gameSeconds = gameduration * 60;
 
 const methods = ["steam", "mix", "fry", "boil", "stir-fry", "assemble", "blend", "bake"];
 
@@ -34,6 +38,12 @@ const checkBtn = document.getElementById("checkBtn");
 const feedbackEl = document.getElementById("feedback");
 const restartBtn = document.getElementById("restartBtn");
 
+const startScreen = document.getElementById("startScreen");
+const gameScreen = document.getElementById("gameScreen");
+const startBtn = document.getElementById("startBtn");
+const gameTimerEl = document.getElementById("gameTimer");
+const closeModal = document.getElementById("closeModal");
+
 const modalTextEl = document.getElementById("modalText");
 const levelSelectionEl = document.getElementById("levelSelection");
 const levelBtns = {
@@ -42,6 +52,35 @@ const levelBtns = {
     3: document.getElementById("level3Btn")
 };
 const tryAgainBtn = document.getElementById("tryAgainBtn");
+
+// ===============================
+// RESTART
+// ===============================
+function restartGame() {
+    // Reset game state
+    currentLevel = 1;
+    currentIndexByLevel = { 1: 0, 2: 0, 3: 0 };
+    answeredByLevel = { 1: new Set(), 2: new Set(), 3: new Set() };
+    errorCount = 0;
+    totalScore = 0;
+    scoreDisplay.textContent = totalScore;
+    clearQuestionUI();
+    dishNameEl.textContent = "";
+    for (const btn of Object.values(levelBtns)) {
+        btn.disabled = false;
+    }
+    applyLevel(levelBtns[1]);
+    renderQuestion(currentLevel);
+
+    // Reset timers
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    gameTimerEl.textContent = `${gameduration}:00`;
+
+    // return to start screen
+    startScreen.hidden = false;
+    gameScreen.hidden = true;
+}
 
 // ===============================
 // UTILITIES
@@ -653,6 +692,38 @@ fetch("../assets/SecretRecipe.xlsx")
 
 
 // ===============================
+// TIMER FUNCTIONS
+// ===============================
+function updateGameTimerDisplay() {
+    const mins = Math.floor(gameSeconds / 60);
+    const secs = gameSeconds % 60;
+    gameTimerEl.textContent =`${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+}
+
+function startGameTimer() {
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    updateGameTimerDisplay();
+    gameTimerInterval = setInterval(() => {
+        gameSeconds--;
+        updateGameTimerDisplay();
+        if (gameSeconds <= 0) {
+            clearInterval(gameTimerInterval);
+            endGame();
+        }
+    }, 1000); // 1 sec interval
+}
+
+function endGame() {
+    checkBtn.disabled = true;
+    document.getElementById("finalScore").textContent = totalScore;
+
+    const modal = new bootstrap.Modal(document.getElementById("timeUpModal"));
+    modal.show();
+}
+
+
+// ===============================
 // EVENTS
 // ===============================
 
@@ -684,19 +755,11 @@ checkBtn.onclick = () => {
     checkAnswer();
 };
 
-restartBtn.onclick = () => {
-    // Reset game state
-    currentLevel = 1;
-    currentIndexByLevel = { 1: 0, 2: 0, 3: 0 };
-    answeredByLevel = { 1: new Set(), 2: new Set(), 3: new Set() };
-    errorCount = 0;
-    totalScore = 0;
-    scoreDisplay.textContent = totalScore;
-    clearQuestionUI();
-    dishNameEl.textContent = "";
-    for (const btn of Object.values(levelBtns)) {
-        btn.disabled = false;
-    }
-    applyLevel(levelBtns[1]);
-    renderQuestion(currentLevel);
-}
+restartBtn.addEventListener("click", restartGame);
+closeModal.addEventListener("click", restartGame);
+
+startBtn.addEventListener("click", () => {
+    startScreen.hidden = true;
+    gameScreen.hidden = false;
+    startGameTimer();
+});

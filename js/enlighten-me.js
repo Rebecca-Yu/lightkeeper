@@ -1,6 +1,8 @@
 // ===============================
 // GAME STATE
 // ===============================
+const gameduration = 20; //min
+
 let questions = [];
 let currentIndex = 0;
 let gameData = null;
@@ -9,6 +11,8 @@ let revealed = [];
 let incorrectGuesses = 0;
 const maxIncorrect = 9;
 let score = 0;
+let gameTimerInterval;
+let gameSeconds = gameduration * 60;
 
 // ===============================
 // DOM ELEMENTS
@@ -22,6 +26,12 @@ const message = document.getElementById("message");
 const letters = document.getElementById("letters");
 const restartBtn = document.getElementById("restartBtn");
 const nextBtn = document.getElementById("nextBtn");
+
+const startScreen = document.getElementById("startScreen");
+const gameScreen = document.getElementById("gameScreen");
+const startBtn = document.getElementById("startBtn");
+const gameTimerEl = document.getElementById("gameTimer");
+const closeModal = document.getElementById("closeModal");
 
 // enable tooltips
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -38,6 +48,22 @@ function shuffle(arr) {
     return arr;
 }
 
+function restartGame() {
+    score = 0;
+    currentIndex = 0;
+    questions = shuffle(questions);
+
+    // Reset timers
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    gameTimerEl.textContent = `${gameduration}:00`;
+
+    startGame();
+
+    // return to start screen
+    startScreen.hidden = false;
+    gameScreen.hidden = true;
+}
 
 // ===============================
 // RENDER FUNCTIONS
@@ -225,15 +251,49 @@ fetch("../assets/EnlightenMe.xlsx")
     })
     .catch(err => console.error("XLSX LOAD ERROR:", err));
 
-    
+
+// ===============================
+// TIMER FUNCTIONS
+// ===============================
+function updateGameTimerDisplay() {
+    const mins = Math.floor(gameSeconds / 60);
+    const secs = gameSeconds % 60;
+    gameTimerEl.textContent =`${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+}
+
+function startGameTimer() {
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    updateGameTimerDisplay();
+    gameTimerInterval = setInterval(() => {
+        gameSeconds--;
+        updateGameTimerDisplay();
+        if (gameSeconds <= 0) {
+            clearInterval(gameTimerInterval);
+            endGame();
+        }
+    }, 1000); // 1 sec interval
+}
+
+function endGame() {
+    nextBtn.disabled = true;
+    document.getElementById("finalScore").textContent = score;
+
+    const modal = new bootstrap.Modal(document.getElementById("timeUpModal"));
+    modal.show();
+}
+
+
 // ===============================
 // BUTTON EVENTS
 // ===============================
-restartBtn.onclick = () => {
-    score = 0;
-    currentIndex = 0;
-    questions = shuffle(questions);
-    startGame();
-};
-
 nextBtn.onclick = nextRound;
+restartBtn.addEventListener("click", restartGame);
+closeModal.addEventListener("click", restartGame);
+
+startBtn.addEventListener("click", () => {
+    startScreen.hidden = true;
+    gameScreen.hidden = false;
+    startGameTimer();
+});
+

@@ -16,49 +16,76 @@
             <h6><a href="../index.html"><i class="bi bi-house home"></i></a></h6>
         </div>
 
-        <div class="container-fluid">
-            <div class="row pt-5">
-                <!-- LEFT COLUMN -->
-                <div class="col-1 d-flex flex-column align-items-center p-4 gap-4">
-                    <button class="btn btn-outline-danger" id="restartBtn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Restart">
-                        <i class="bi bi-arrow-clockwise fs-3"></i>
-                    </button>
+        <!-- START SCREEN -->
+        <div id="startScreen" class="grid position-absolute top-50 start-50 translate-middle">
+            <button id="startBtn" class="btn btn-dark bell-font fs-1 px-5 py-3">Start Game</button>
+        </div>
 
-                    <button class="btn btn-outline-success" id="nextBtn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Next Round">
-                        <i class="bi bi-arrow-right fs-3"></i>
-                    </button>
-                </div>
+        <!-- GAME SCREEN -->
+        <div id="gameScreen" hidden>
+            <div class="text-center text-warning bell-font pt-3 fs-2" id="gameTimer">00:00</div>
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- LEFT COLUMN -->
+                    <div class="col-1 d-flex flex-column align-items-center p-4 gap-4">
+                        <button class="btn btn-outline-danger" id="restartBtn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Restart">
+                            <i class="bi bi-arrow-clockwise fs-3"></i>
+                        </button>
 
-                <!-- CENTER -->
-                <div class="col-8 col-md-10">   
-                    <div class="incorrect-bar pb-3 pe-2 d-flex justify-content-end" id="incorrectBar"></div>
-                    <div class="card py-2">
-                        <div class="card-body">
-                            <div id="clueBox" class="text-center bell-font"></div>
+                        <button class="btn btn-outline-success" id="nextBtn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Next Round">
+                            <i class="bi bi-arrow-right fs-3"></i>
+                        </button>
+                    </div>
 
-                            <div id="wordBox" class="bell-font d-flex gap-1 flex-wrap justify-content-center pt-3 pb-5"></div>
+                    <!-- CENTER -->
+                    <div class="col-8 col-md-10">   
+                        <div class="incorrect-bar pb-3 pe-2 d-flex justify-content-end" id="incorrectBar"></div>
+                        <div class="card py-2">
+                            <div class="card-body">
+                                <div id="clueBox" class="text-center bell-font"></div>
 
-                            <div id="message" class="message card-footer text-center bell-font"></div>
+                                <div id="wordBox" class="bell-font d-flex gap-1 flex-wrap justify-content-center pt-3 pb-5"></div>
+
+                                <div id="message" class="message card-footer text-center bell-font"></div>
+                            </div>
+                        </div>
+                        <div class="py-3">
+                            <div id="letters" class="letters bell-font d-flex gap-2 flex-wrap justify-content-center"></div>
+                        </div>
+
+                        <!-- TIME'S UP POP UP -->
+                        <div class="modal fade" id="timeUpModal" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title bell-font text-danger">Time's Up!</h4>
+                                    </div>
+                                    <div class="modal-body bell-font">
+                                        <h3>Your Final Score</h3>
+                                        <h1 id="finalScore">0</h1>
+                                        <div class="justify-content-end d-flex p-3">
+                                            <button id="closeModal" class="btn btn-danger" data-bs-dismiss="modal">Restart Game</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="py-3">
-                        <div id="letters" class="letters bell-font d-flex gap-2 flex-wrap justify-content-center"></div>
+
+                    <!-- RIGHT COLUMN -->
+                    <div class="col-2 col-md-1 d-flex flex-column align-items-center pt-4 gap-4">
+                        <div class="text-center text-light bell-font">
+                            <h5>Question</h5>
+                            <h2 id="questionIndex">0</h2>
+                        </div>
+
+                        <div class="text-center text-light bell-font">
+                            <h5>Score</h5>
+                            <h2 id="score">0</h2>
+                        </div>
                     </div>
+
                 </div>
-
-                <!-- RIGHT COLUMN -->
-                <div class="col-2 col-md-1 d-flex flex-column align-items-center pt-4 gap-4">
-                    <div class="text-center text-light bell-font">
-                        <h5>Question</h5>
-                        <h2 id="questionIndex">0</h2>
-                    </div>
-
-                    <div class="text-center text-light bell-font">
-                        <h5>Score</h5>
-                        <h2 id="score">0</h2>
-                    </div>
-                </div>
-
             </div>
         </div>
 

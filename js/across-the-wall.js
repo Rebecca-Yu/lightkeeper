@@ -565,7 +565,4 @@ startBtn.addEventListener("click", () => {
     startScreen.hidden = true;
     gameScreen.hidden = false;
     startGameTimer();
-    // Render first question
-    questions = shuffle(questions);
-    renderQuestion();
 });

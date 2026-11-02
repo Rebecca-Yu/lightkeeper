@@ -1,6 +1,8 @@
 // ===============================
 // GAME STATE
 // ===============================
+const gameduration = 20; //min
+
 let characters = [];
 let order = [];
 let index = -1;
@@ -9,6 +11,8 @@ let clueNumber = 1;
 let score = 0;
 let round = 0;
 let finished = false;
+let gameTimerInterval;
+let gameSeconds = gameduration * 60;
 
 // ===============================
 // DOM ELEMENTS 
@@ -21,6 +25,12 @@ const restartBtn = document.getElementById("restartBtn");
 const scoreEl = document.getElementById("score");
 const roundEl = document.getElementById("round");
 const cardGrid = document.getElementById("cardGrid");
+
+const startScreen = document.getElementById("startScreen");
+const gameScreen = document.getElementById("gameScreen");
+const startBtn = document.getElementById("startBtn");
+const gameTimerEl = document.getElementById("gameTimer");
+const closeModal = document.getElementById("closeModal");
 
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
@@ -172,6 +182,15 @@ function restartGame() {
   index = -1;
 
   nextCharacter();
+
+  // Reset timers
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    gameTimerEl.textContent = `${gameduration}:00`;
+
+    // return to start screen
+    startScreen.hidden = false;
+    gameScreen.hidden = true;
 }
 
 // ===============================
@@ -213,9 +232,51 @@ fetch("../assets/GuessWho.xlsx")
     clueBox.textContent = "Error loading GuessWho.xlsx";
   });
 
+
+// ===============================
+// TIMER FUNCTIONS
+// ===============================
+function updateGameTimerDisplay() {
+    const mins = Math.floor(gameSeconds / 60);
+    const secs = gameSeconds % 60;
+    gameTimerEl.textContent =`${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+}
+
+function startGameTimer() {
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    updateGameTimerDisplay();
+    gameTimerInterval = setInterval(() => {
+        gameSeconds--;
+        updateGameTimerDisplay();
+        if (gameSeconds <= 0) {
+            clearInterval(gameTimerInterval);
+            endGame();
+        }
+    }, 1000); // 1 sec interval
+}
+
+function endGame() {
+    nextClueBtn.disabled = true;
+    nextCharacterBtn.disabled = true;
+    document.getElementById("finalScore").textContent = score;
+
+    const modal = new bootstrap.Modal(document.getElementById("timeUpModal"));
+    modal.show();
+}
+
+
 // ===============================
 // BUTTON EVENTS
 // ===============================
 nextClueBtn.addEventListener("click", nextClue);
 nextCharacterBtn.addEventListener("click", nextCharacter);
 restartBtn.addEventListener("click", restartGame);
+closeModal.addEventListener("click", restartGame);
+
+startBtn.addEventListener("click", () => {
+    startScreen.hidden = true;
+    gameScreen.hidden = false;
+    startGameTimer();
+});
+
