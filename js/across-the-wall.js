@@ -1,9 +1,13 @@
 // ===============================
 // GAME STATE
 // ===============================
+const gameduration = 20; //min
+
 let questions = [];
 let currentIndex = 0;
 let score = 0;
+let gameTimerInterval;
+let gameSeconds = gameduration * 60;
 
 // ===============================
 // DOM ELEMENTS 
@@ -18,6 +22,11 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const checkBtn = document.getElementById("checkBtn");
 const restartBtn = document.getElementById("restartBtn");
+const startScreen = document.getElementById("startScreen");
+const gameScreen = document.getElementById("gameScreen");
+const startBtn = document.getElementById("startBtn");
+const gameTimerEl = document.getElementById("gameTimer");
+const closeModal = document.getElementById("closeModal");
 
 // Get room from HTML tag
 const room = document.documentElement.getAttribute("data-room") || "A";
@@ -60,9 +69,14 @@ function restartGame() {
     q1El.textContent = "";
     q2El.innerHTML = "";
 
-    // Re-render first question
-    questions = shuffle(questions);
-    renderQuestion();
+    // Reset timers
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    gameTimerEl.textContent = `${gameduration}:00`;
+
+    // return to start screen
+    startScreen.hidden = false;
+    gameScreen.hidden = true;
 }
 
 
@@ -162,7 +176,8 @@ function renderMultipleChoice(q) {
             img.alt = "option " + letter;
             img.className = "img-fluid choice-img";
             btn.appendChild(img);
-        } else {
+        } 
+        else {
             btn.textContent = value;
         }
 
@@ -268,9 +283,11 @@ function renderQuestion() {
 
     if (type === "pin" || type === "short-answer") {
         renderTextAnswer(q);
-    } else if (type === "multiple-choice") {
+    } 
+    else if (type === "multiple-choice") {
         renderMultipleChoice(q);
-    } else {
+    } 
+    else {
         // fallback: text input
         renderTextAnswer(q);
     }
@@ -298,7 +315,8 @@ function renderQuestion() {
     // Disable check button if question already correct
     if (questions[currentIndex].status === "correct") {
         checkBtn.disabled = true;
-    } else {
+    } 
+    else {
         checkBtn.disabled = false;
     }
 }
@@ -488,11 +506,45 @@ fetch("../assets/AcrossTheWall.xlsx")
     });
 
 
+// ===============================
+// TIMER FUNCTIONS
+// ===============================
+function updateGameTimerDisplay() {
+    const mins = Math.floor(gameSeconds / 60);
+    const secs = gameSeconds % 60;
+    gameTimerEl.textContent =`${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+}
+
+function startGameTimer() {
+    clearInterval(gameTimerInterval);
+    gameSeconds = gameduration * 60;
+    updateGameTimerDisplay();
+    gameTimerInterval = setInterval(() => {
+        gameSeconds--;
+        updateGameTimerDisplay();
+        if (gameSeconds <= 0) {
+            clearInterval(gameTimerInterval);
+            endGame();
+        }
+    }, 1000); // 1 sec interval
+}
+
+function endGame() {
+    checkBtn.disabled = true;
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    document.getElementById("finalScore").textContent = score;
+
+    const modal = new bootstrap.Modal(document.getElementById("timeUpModal"));
+    modal.show();
+}
+
 
 // ===============================
 // BUTTON EVENTS
 // ===============================
 restartBtn.addEventListener("click", restartGame);
+closeModal.addEventListener("click", restartGame);
 checkBtn.addEventListener("click", validateAnswer);
 
 prevBtn.addEventListener("click", () => {
@@ -507,4 +559,13 @@ nextBtn.addEventListener("click", () => {
         currentIndex++;
         renderQuestion();
     }
+});
+
+startBtn.addEventListener("click", () => {
+    startScreen.hidden = true;
+    gameScreen.hidden = false;
+    startGameTimer();
+    // Render first question
+    questions = shuffle(questions);
+    renderQuestion();
 });
