@@ -79,6 +79,8 @@ function restartGame() {
     // return to start screen
     startScreen.hidden = false;
     gameScreen.hidden = true;
+    questions = shuffle(questions);
+    renderQuestion();
 }
 
 
