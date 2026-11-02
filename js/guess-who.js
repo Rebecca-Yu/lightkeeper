@@ -31,6 +31,7 @@ const gameScreen = document.getElementById("gameScreen");
 const startBtn = document.getElementById("startBtn");
 const gameTimerEl = document.getElementById("gameTimer");
 const closeModal = document.getElementById("closeModal");
+const timeModalHeader = document.getElementById("timeModalHeader");
 
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
@@ -147,6 +148,8 @@ function handleGuess(guessName) {
     if (index >= order.length - 1) {
       clueBox.innerHTML = `<p>Correct! +${pts} points.</p><p>No more characters!</p>`;
       nextCharacterBtn.disabled = true;
+      timeModalHeader.textContent = "No more characters!";
+      endGame();
     }
     else {
       clueBox.innerHTML = `<p>Correct! +${pts} points.</p><p>Select "Next Round" <i class="bi bi-arrow-right"></i></p>`;
@@ -250,13 +253,14 @@ function startGameTimer() {
         gameSeconds--;
         updateGameTimerDisplay();
         if (gameSeconds <= 0) {
-            clearInterval(gameTimerInterval);
+            timeModalHeader.textContent = "Time's Up!";
             endGame();
         }
     }, 1000); // 1 sec interval
 }
 
 function endGame() {
+    clearInterval(gameTimerInterval);
     nextClueBtn.disabled = true;
     nextCharacterBtn.disabled = true;
     document.getElementById("finalScore").textContent = score;
