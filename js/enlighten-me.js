@@ -1,7 +1,7 @@
 // ===============================
 // GAME STATE
 // ===============================
-const gameduration = 20; //min
+const gameduration = 3; //min
 
 let questions = [];
 let currentIndex = 0;
@@ -32,6 +32,7 @@ const gameScreen = document.getElementById("gameScreen");
 const startBtn = document.getElementById("startBtn");
 const gameTimerEl = document.getElementById("gameTimer");
 const closeModal = document.getElementById("closeModal");
+const timeModalHeader = document.getElementById("timeModalHeader");
 
 // enable tooltips
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -205,6 +206,8 @@ function nextRound() {
         message.textContent = "No more questions available!";
         disableAllLetters();
         nextBtn.disabled = true;
+        timeModalHeader.textContent = "No more questions available!";
+        endGame();
         return;
     }
     startGame();
@@ -269,13 +272,14 @@ function startGameTimer() {
         gameSeconds--;
         updateGameTimerDisplay();
         if (gameSeconds <= 0) {
-            clearInterval(gameTimerInterval);
+            timeModalHeader.textContent = "Time's Up!";
             endGame();
         }
     }, 1000); // 1 sec interval
 }
 
 function endGame() {
+    clearInterval(gameTimerInterval);
     nextBtn.disabled = true;
     document.getElementById("finalScore").textContent = score;
 
