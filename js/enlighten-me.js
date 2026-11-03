@@ -1,7 +1,7 @@
 // ===============================
 // GAME STATE
 // ===============================
-const gameduration = 3; //min
+const gameduration = 20; //min
 
 let questions = [];
 let currentIndex = 0;
