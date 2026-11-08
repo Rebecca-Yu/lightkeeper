@@ -9,7 +9,7 @@ let gameData = null;
 let answer = "";
 let revealed = [];
 let incorrectGuesses = 0;
-const maxIncorrect = 9;
+// const maxIncorrect = 8;
 let score = 0;
 let gameTimerInterval;
 let gameSeconds = gameduration * 60;
@@ -91,22 +91,22 @@ function renderLetters() {
         const letter = String.fromCharCode(97 + i);
         const btn = document.createElement("button");
         btn.textContent = letter.toUpperCase();
-        btn.className = "btn btn-light fs-3 square-btn";
+        btn.className = "btn btn-light fs-2 square-btn";
         btn.onclick = () => guessLetter(letter, btn);
         letters.appendChild(btn);
     }
 }
 
-function renderIncorrectTracker() {
+function renderIncorrectTracker(maxIncorrect) {
     incorrectBar.innerHTML = "";
     for (let i = 0; i < maxIncorrect; i++) {
         const dot = document.createElement("i");
-        dot.className = "bi bi-circle-fill p-1";
+        dot.className = "bi bi-suit-heart-fill p-1 fs-2";
         if (i < incorrectGuesses) {
-            dot.classList.add("text-danger");
+            dot.classList.add("text-secondary");
         }
         else {
-            dot.classList.add("text-secondary");
+            dot.classList.add("text-danger");
         }
         incorrectBar.appendChild(dot);
     }
@@ -145,14 +145,15 @@ function startGame() {
     
     renderWordBoxes();
     renderLetters();
-    renderIncorrectTracker();
+    renderIncorrectTracker(gameData.limit);
 }
 
 function guessLetter(letter, btn) {
-    if (incorrectGuesses >= maxIncorrect) return;
-
+    
     let correct = false;
     const q = questions[currentIndex];
+
+    if (incorrectGuesses >= q.limit) return;
 
     for (let i = 0; i < answer.length; i++) {
         if (answer[i] === letter) {
@@ -184,12 +185,12 @@ function guessLetter(letter, btn) {
         btn.disabled = true;
 
         incorrectGuesses++;
-        renderIncorrectTracker();
+        renderIncorrectTracker(q.limit);
 
-        if (incorrectGuesses >= maxIncorrect) {
+        if (incorrectGuesses >= q.limit) {
             message.classList.remove("text-success");
             message.classList.add("text-danger");
-            message.textContent = `Out of guesses! The answer was: ${answer.toUpperCase()}. -100 points!`;
+            message.innerHTML = `Out of guesses! -100 points!<br>The answer was: ${answer.toUpperCase()}.`;
             disableAllLetters();
             score -= 100;
             scoreEl.textContent = score;
@@ -230,7 +231,8 @@ fetch("../assets/EnlightenMe.xlsx")
             clue1: header.indexOf("clue1"),
             clue2: header.indexOf("clue2"),
             clue2Datatype: header.indexOf("clue2-datatype"),
-            answer: header.indexOf("answer")
+            answer: header.indexOf("answer"),
+            limit: header.indexOf("guess-limit")
         };
 
         questions = [];
@@ -244,7 +246,8 @@ fetch("../assets/EnlightenMe.xlsx")
                 clue1: r[idx.clue1],
                 clue2: r[idx.clue2],
                 clue2Datatype: r[idx.clue2Datatype],
-                answer: r[idx.answer]
+                answer: r[idx.answer],
+                limit: r[idx.limit]
             });
         }
 
