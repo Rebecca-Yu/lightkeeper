@@ -29,10 +29,16 @@ const nextBtn = document.getElementById("nextBtn");
 
 const startScreen = document.getElementById("startScreen");
 const gameScreen = document.getElementById("gameScreen");
-const startBtn = document.getElementById("startBtn");
+// const startBtn = document.getElementById("startBtn");
 const gameTimerEl = document.getElementById("gameTimer");
 const closeModal = document.getElementById("closeModal");
 const timeModalHeader = document.getElementById("timeModalHeader");
+
+const oneBtn = document.getElementById("one");
+const twoBtn = document.getElementById("two");
+const threeBtn = document.getElementById("three");
+const fourBtn = document.getElementById("four");
+const fiveBtn = document.getElementById("five");
 
 // enable tooltips
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -217,46 +223,57 @@ function nextRound() {
 // ===============================
 // XLSX LOADING
 // ===============================
-fetch("../assets/EnlightenMe.xlsx")
-    .then(res => res.arrayBuffer())
-    .then(buffer => {
-        const workbook = XLSX.read(buffer, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+function loadXLSX(level) {
+    fetch("../assets/EnlightenMe.xlsx")
+        .then(res => res.arrayBuffer())
+        .then(buffer => {
+            const workbook = XLSX.read(buffer, { type: "array" });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        const header = rows[0];
+            const header = rows[0];
 
-        const idx = {
-            score: header.indexOf("score"),
-            clue1: header.indexOf("clue1"),
-            clue2: header.indexOf("clue2"),
-            clue2Datatype: header.indexOf("clue2-datatype"),
-            answer: header.indexOf("answer"),
-            limit: header.indexOf("guess-limit")
-        };
+            const idx = {
+                level: header.indexOf("level"),
+                score: header.indexOf("score"),
+                clue1: header.indexOf("clue1"),
+                clue2: header.indexOf("clue2"),
+                clue2Datatype: header.indexOf("clue2-datatype"),
+                answer: header.indexOf("answer"),
+                limit: header.indexOf("guess-limit")
+            };
 
-        questions = [];
+            questions = [];
 
-        for (let i = 1; i < rows.length; i++) {
-            const r = rows[i];
-            if (!r[idx.answer]) continue;
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                if (!r[idx.answer]) continue;
 
-            questions.push({
-                score: r[idx.score],
-                clue1: r[idx.clue1],
-                clue2: r[idx.clue2],
-                clue2Datatype: r[idx.clue2Datatype],
-                answer: r[idx.answer],
-                limit: r[idx.limit]
-            });
-        }
+                if (r[idx.level].trim().toUpperCase() === level.toUpperCase()) {
+                    questions.push({
+                        score: r[idx.score],
+                        clue1: r[idx.clue1],
+                        clue2: r[idx.clue2],
+                        clue2Datatype: r[idx.clue2Datatype],
+                        answer: r[idx.answer],
+                        limit: r[idx.limit]
+                    });
+                }
+            }
 
-        questions = shuffle(questions);
-        currentIndex = 0;
-        startGame();
-    })
-    .catch(err => console.error("XLSX LOAD ERROR:", err));
+            questions = shuffle(questions);
+            currentIndex = 0;
+            startGame();
+        })
+        .catch(err => console.error("XLSX LOAD ERROR:", err));
+}
 
+function loadGame(level) {
+    startScreen.hidden = true;
+    gameScreen.hidden = false;
+    startGameTimer();
+    loadXLSX(level)
+}
 
 // ===============================
 // TIMER FUNCTIONS
@@ -298,9 +315,12 @@ nextBtn.onclick = nextRound;
 restartBtn.addEventListener("click", restartGame);
 closeModal.addEventListener("click", restartGame);
 
-startBtn.addEventListener("click", () => {
-    startScreen.hidden = true;
-    gameScreen.hidden = false;
-    startGameTimer();
-});
+// startBtn.addEventListener("click", () => loadGame());
+
+oneBtn.addEventListener("click", () => loadGame("EASY"));
+twoBtn.addEventListener("click", () => loadGame("EASY"));
+threeBtn.addEventListener("click", () => loadGame("EASY"));
+fourBtn.addEventListener("click", () => loadGame("NORMAL"));
+fiveBtn.addEventListener("click", () => loadGame("NORMAL"));
+
 
