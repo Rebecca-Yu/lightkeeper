@@ -197,43 +197,25 @@ function restartGame() {
 }
 
 // ===============================
-// LOAD EXCEL FILE
+// LOADING
 // ===============================
-fetch("../assets/GuessWho.xlsx")
-  .then(res => res.arrayBuffer())
-  .then(buffer => {
-    const workbook = XLSX.read(buffer, { type: "array" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+function loadQuestions() {
+  characters = QUESTIONS.map(q => ({
+      character: q.saint || "",
+      chinese: q.chinese || "",
+      clues: [
+          q.clue1 || "",
+          q.clue2 || "",
+          q.clue3 || "",
+          q.clue4 || "",
+          q.clue5 || ""
+      ]
+  }));
 
-    const header = rows[0];
-    const characterIndex = header.indexOf("saint");
-    const chineseIndex = header.indexOf("chinese");
-    const clueIndexes = [
-      header.indexOf("clue1"),
-      header.indexOf("clue2"),
-      header.indexOf("clue3"),
-      header.indexOf("clue4"),
-      header.indexOf("clue5")
-    ];
-
-    for (let i = 1; i < rows.length; i++) {
-      const r = rows[i];
-      characters.push({
-        character: r[characterIndex],
-        chinese: r[chineseIndex],
-        clues: clueIndexes.map(c => r[c] || "")
-      });
-    }
-
-    order = shuffle([...Array(characters.length).keys()]);
-    renderCards();
-    nextCharacter();
-  })
-  .catch(err => {
-    console.error("XLSX LOAD ERROR:", err);
-    clueBox.textContent = "Error loading GuessWho.xlsx";
-  });
+  order = shuffle([...Array(characters.length).keys()]);
+  renderCards();
+  nextCharacter();
+}
 
 
 // ===============================
@@ -282,5 +264,6 @@ startBtn.addEventListener("click", () => {
     startScreen.hidden = true;
     gameScreen.hidden = false;
     startGameTimer();
+    loadQuestions();
 });
 

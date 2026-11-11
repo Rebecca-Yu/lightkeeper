@@ -221,58 +221,33 @@ function nextRound() {
 }
 
 // ===============================
-// XLSX LOADING
+// LOADING
 // ===============================
-function loadXLSX(level) {
-    fetch("../assets/EnlightenMe.xlsx")
-        .then(res => res.arrayBuffer())
-        .then(buffer => {
-            const workbook = XLSX.read(buffer, { type: "array" });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+function loadQuestions(level) {
+    questions = QUESTIONS.filter(q =>
+        q.level &&
+        q.level.trim().toUpperCase() === level.toUpperCase() &&
+        q.answer
+    )
+    .map(q => ({
+        score: Number(q.score || 0),
+        clue1: q.clue1 || "",
+        clue2: q.clue2 || "",
+        clue2Datatype: q["clue2-datatype"] || "",
+        answer: q.answer,
+        limit: Number(q["guess-limit"] || 8)
+    }));
 
-            const header = rows[0];
-
-            const idx = {
-                level: header.indexOf("level"),
-                score: header.indexOf("score"),
-                clue1: header.indexOf("clue1"),
-                clue2: header.indexOf("clue2"),
-                clue2Datatype: header.indexOf("clue2-datatype"),
-                answer: header.indexOf("answer"),
-                limit: header.indexOf("guess-limit")
-            };
-
-            questions = [];
-
-            for (let i = 1; i < rows.length; i++) {
-                const r = rows[i];
-                if (!r[idx.answer]) continue;
-
-                if (r[idx.level].trim().toUpperCase() === level.toUpperCase()) {
-                    questions.push({
-                        score: r[idx.score],
-                        clue1: r[idx.clue1],
-                        clue2: r[idx.clue2],
-                        clue2Datatype: r[idx.clue2Datatype],
-                        answer: r[idx.answer],
-                        limit: r[idx.limit]
-                    });
-                }
-            }
-
-            questions = shuffle(questions);
-            currentIndex = 0;
-            startGame();
-        })
-        .catch(err => console.error("XLSX LOAD ERROR:", err));
+    questions = shuffle(questions);
+    currentIndex = 0;
+    startGame();
 }
 
 function loadGame(level) {
     startScreen.hidden = true;
     gameScreen.hidden = false;
     startGameTimer();
-    loadXLSX(level)
+    loadQuestions(level)
 }
 
 // ===============================

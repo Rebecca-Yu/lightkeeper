@@ -625,73 +625,41 @@ function checkAnswer() {
 
 
 // ===============================
-// XLSX LOAD
+// LOADING
 // ===============================
-fetch("../assets/SecretRecipe.xlsx")
-    .then(res => res.arrayBuffer())
-    .then(buffer => {
-        const workbook = XLSX.read(buffer, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-        const header = rows[0];
-        const idx = {
-            score: header.indexOf("score"),
-            dishName: header.indexOf("dish-name"),
-            correctMethod: header.indexOf("correct-method"),
-            correctIngredients: header.indexOf("correct-ingredients"),
-            ingredient1: header.indexOf("ingredient1"),
-            ingredient2: header.indexOf("ingredient2"),
-            ingredient3: header.indexOf("ingredient3"),
-            ingredient4: header.indexOf("ingredient4"),
-            ingredient5: header.indexOf("ingredient5"),
-            ingredient6: header.indexOf("ingredient6"),
-            ingredient7: header.indexOf("ingredient7"),
-            ingredient8: header.indexOf("ingredient8"),
-            ingredient9: header.indexOf("ingredient9"),
-            ingredient10: header.indexOf("ingredient10")
-        };
-
-        for (let i = 1; i < rows.length; i++) {
-            const r = rows[i];
-            if (!r[idx.score] || !r[idx.dishName]) continue;
-
+function loadQuestions() {
+    allQuestions = QUESTIONS
+        .filter(q => q.score && q["dish-name"])
+        .map(q => {
             const ingredients = [];
             for (let k = 1; k <= 10; k++) {
-                const colIndex = idx["ingredient" + k];
-                if (colIndex !== -1 && r[colIndex]) {
-                    ingredients.push(String(r[colIndex]).trim());
+                const value = q[`ingredient${k}`];
+                if (value?.trim()) {
+                    ingredients.push(String(value).trim());
                 }
             }
-
-            allQuestions.push({
-                score: Number(r[idx.score]),
-                dishName: String(r[idx.dishName]).trim(),
-                correctMethod: r[idx.correctMethod] 
-                                ? String(r[idx.correctMethod]).trim() 
-                                : "",
-                correctIngredients: (r[idx.correctIngredients]
-                                    ? String(r[idx.correctIngredients]).trim()
-                                    : "")
-                                    .split(",")
-                                    .map(s => s.trim())
-                                    .filter(s => s.length > 0),
+            return {
+                score: Number(q.score),
+                dishName: String(q["dish-name"]).trim(),
+                correctMethod: q["correct-method"]
+                    ? String(q["correct-method"]).trim()
+                    : "",
+                correctIngredients: (
+                    q["correct-ingredients"]
+                        ? String(q["correct-ingredients"]).trim()
+                        : ""
+                ).split(",").map(s => s.trim()).filter(s => s.length > 0),
                 ingredients: ingredients
-            });
-        }
+            };
+        });
 
-        // Divide into levels
-        levelQuestions[1] = shuffle(allQuestions.filter(q => q.score === 100));
-        levelQuestions[2] = shuffle(allQuestions.filter(q => q.score === 300));
-        levelQuestions[3] = shuffle(allQuestions.filter(q => q.score === 500));
+    levelQuestions[1] = shuffle(allQuestions.filter(q => q.score === 100));
+    levelQuestions[2] = shuffle(allQuestions.filter(q => q.score === 300));
+    levelQuestions[3] = shuffle(allQuestions.filter(q => q.score === 500));
 
-        restartBtn.click(); // Start with first question of level 1
-    })
-    .catch(err => {
-        console.error("XLSX LOAD ERROR:", err);
-        dishNameEl.textContent = "Error loading questions.";
-    });
-
+    currentLevel = 1;
+    renderQuestion(currentLevel);
+}
 
 // ===============================
 // TIMER FUNCTIONS
@@ -762,4 +730,5 @@ startBtn.addEventListener("click", () => {
     startScreen.hidden = true;
     gameScreen.hidden = false;
     startGameTimer();
+    loadQuestions();
 });

@@ -1,7 +1,7 @@
 // ===============================
 // GAME STATE
 // ===============================
-const gameduration = 20; //min
+const gameduration = 25; //min
 
 let questions = [];
 let currentIndex = 0;
@@ -434,80 +434,47 @@ function validateAnswer() {
 
 
 // ===============================
-// LOAD EXCEL FILE
+// LOADING
 // ===============================
-fetch("../assets/AcrossTheWall.xlsx")
-    .then(res => res.arrayBuffer())
-    .then(buffer => {
-        const workbook = XLSX.read(buffer, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+function loadQuestions() {
+    questions = QUESTIONS
+        .filter(q =>
+            q["question-room"] &&
+            q["question-room"].trim().toUpperCase() === room.toUpperCase()
+        )
+        .map(q => ({
+            room: q["question-room"],
+            score: Number(q["score"] || 0),
+            q1: q["question1"] || "",
+            q2: q["question2"] || "",
+            q2Datatype: q["question2-datatype"] || "",
+            answerType: q["answer-type"] || "",
+            answerDatatype: q["answer-datatype"] || "",
+            answerPrefix: q["answer-prefix"] || "",
+            answerSuffix: q["answer-suffix"] || "",
+            answerLength: q["answer-length"] || "",
+            orderCheck: q["order-check"] || "Y",
+            correct: q["correct-answer"] || "",
+            status: "unanswered",
+            options: {
+                A: q["A"] || "",
+                B: q["B"] || "",
+                C: q["C"] || "",
+                D: q["D"] || ""
+            },
+            lastAnswer: null,
+            lastChoice: null
+        }));
 
-        const header = rows[0];
-        const idx = {
-            room: header.indexOf("question-room"),
-            score: header.indexOf("score"),
-            q1: header.indexOf("question1"),
-            q2: header.indexOf("question2"),
-            q2Datatype: header.indexOf("question2-datatype"),
-            answerType: header.indexOf("answer-type"),
-            answerDatatype: header.indexOf("answer-datatype"),
-            answerPrefix: header.indexOf("answer-prefix"),
-            answerSuffix: header.indexOf("answer-suffix"),
-            answerLength: header.indexOf("answer-length"),
-            orderCheck: header.indexOf("order-check"),
-            correct: header.indexOf("correct-answer"),
-            A: header.indexOf("A"),
-            B: header.indexOf("B"),
-            C: header.indexOf("C"),
-            D: header.indexOf("D")
-        };
-
-        for (let i = 1; i < rows.length; i++) {
-            const r = rows[i];
-            if (!r[idx.room]) continue;
-
-            if (r[idx.room].trim().toUpperCase() === room.toUpperCase()) {
-                questions.push({
-                    room: r[idx.room],
-                    score: Number(r[idx.score] || 0),
-                    q1: r[idx.q1] || "",
-                    q2: r[idx.q2] || "",
-                    q2Datatype: r[idx.q2Datatype] || "",
-                    answerType: r[idx.answerType] || "",
-                    answerDatatype: r[idx.answerDatatype] || "",
-                    answerPrefix: r[idx.answerPrefix] || "",
-                    answerSuffix: r[idx.answerSuffix] || "",
-                    answerLength: r[idx.answerLength] || "",
-                    orderCheck: r[idx.orderCheck] || "Y",
-                    correct: r[idx.correct] || "",
-                    status: "unanswered",
-                    options: {
-                        A: r[idx.A] || "",
-                        B: r[idx.B] || "",
-                        C: r[idx.C] || "",
-                        D: r[idx.D] || ""
-                    },
-                    lastAnswer: null,
-                    lastChoice: null
-                });
-            }
-        }
-
-        questions = shuffle(questions);
-        if (questions.length === 0) {
-            feedbackEl.textContent = "No questions found for this room.";
-            checkBtn.disabled = true;
-            return;
-        }
-
-        renderQuestion();
-    })
-    .catch(err => {
-        console.error("XLSX load error", err);
-        feedbackEl.textContent = "Error loading questions.";
+    questions = shuffle(questions);
+    if (questions.length === 0) {
+        feedbackEl.textContent = "No questions found for this room.";
         checkBtn.disabled = true;
-    });
+        return;
+    }
+
+    renderQuestion();
+}
 
 
 // ===============================
@@ -570,4 +537,5 @@ startBtn.addEventListener("click", () => {
     startScreen.hidden = true;
     gameScreen.hidden = false;
     startGameTimer();
+    loadQuestions();
 });
