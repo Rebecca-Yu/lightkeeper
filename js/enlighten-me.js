@@ -2,6 +2,8 @@
 // GAME STATE
 // ===============================
 const gameduration = 20; //min
+const maxScore = 500;
+// const maxIncorrect = 8;
 
 let questions = [];
 let currentIndex = 0;
@@ -9,8 +11,8 @@ let gameData = null;
 let answer = "";
 let revealed = [];
 let incorrectGuesses = 0;
-// const maxIncorrect = 8;
 let score = 0;
+let deltaScore = 0;
 let gameTimerInterval;
 let gameSeconds = gameduration * 60;
 
@@ -56,6 +58,7 @@ function shuffle(arr) {
 }
 
 function restartGame() {
+    deltaScore = 0;
     score = 0;
     currentIndex = 0;
     questions = shuffle(questions);
@@ -178,9 +181,11 @@ function guessLetter(letter, btn) {
         if (!revealed.includes("")) {
             message.classList.remove("text-danger");
             message.classList.add("text-success");
-            message.textContent = "Correct! +" + (q.score || 0) + " points!";
+            deltaScore = (maxScore / Number(q.limit || 8)) * (Number(q.limit || 8) - incorrectGuesses);
+            deltaScore = Math.round(deltaScore / 5) * 5;
+            message.textContent = "Correct! +" + deltaScore + " points!";
             disableAllLetters();
-            score += Number(q.score || 0);
+            score += deltaScore;
             scoreEl.textContent = score;
             nextBtn.disabled = false;
         }
